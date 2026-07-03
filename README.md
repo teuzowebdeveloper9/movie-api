@@ -278,6 +278,8 @@ Pull requests executam lint + testes + build; push na `main` adiciona a publica�
 
 ## Deploy (Railway)
 
+**API em produção:** <https://gateway-production-7813.up.railway.app/movies>
+
 O deploy usa as **imagens Docker geradas pelo CI** (GHCR), publicadas no [Railway](https://railway.app). A escolha do Railway é justificada em [docs/trade-offs.md](docs/trade-offs.md): deploy simples, suporte nativo a imagens Docker de registries públicos, rede privada entre serviços e provisionamento de MongoDB/RabbitMQ na mesma plataforma — sem necessidade de gerenciar infraestrutura.
 
 Em produção o gateway roda com `APP_ENV=production`, portanto **sem Swagger publicado** (ver [Swagger](#swagger)). O passo a passo completo do deploy está em [docs/deploy-railway.md](docs/deploy-railway.md).

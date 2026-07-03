@@ -1,5 +1,12 @@
 # Deploy no Railway
 
+**API em produção:** <https://gateway-production-7813.up.railway.app/movies>
+
+```bash
+curl "https://gateway-production-7813.up.railway.app/movies?page=1&page_size=5"
+curl -i https://gateway-production-7813.up.railway.app/swagger/index.html   # 404: Swagger não sobe em produção
+```
+
 ## Por que Railway
 
 Eu queria um deploy **simples**, sem gerenciar infraestrutura, e que aceitasse diretamente as **imagens Docker geradas pelo CI**. O Railway atende exatamente isso:
