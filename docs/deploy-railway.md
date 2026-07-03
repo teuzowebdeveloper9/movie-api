@@ -87,3 +87,28 @@ curl -i https://<dominio-do-gateway>/swagger/index.html   # 404: produção não
 ```
 
 > As imagens no GHCR precisam estar com visibilidade **pública** (Package settings → Change visibility) para o Railway conseguir puxá-las sem credenciais de registry.
+
+## Diferencial DynamoDB validado ao vivo no Railway
+
+O swap de banco previsto pela arquitetura hexagonal foi demonstrado **em produção**, sem alterar uma linha de código:
+
+1. Serviço `localstack` (imagem `localstack/localstack:3`, `SERVICES=dynamodb`) adicionado ao projeto;
+2. No serviço `movies`, apenas variáveis de ambiente foram trocadas: `DB_DRIVER=dynamodb` + `DYNAMODB_ENDPOINT` apontando para o LocalStack;
+3. No redeploy, o serviço criou a tabela `movies` automaticamente, executou o seed do `movies.json` e passou a atender pela mesma URL pública.
+
+Resultados observados na API pública durante a demonstração:
+
+| Operação | Resultado |
+|---|---|
+| `GET /movies` | 200 — 20 filmes (seed no DynamoDB) |
+| `GET /movies?genre=Crime&year=1994` | Pulp Fiction (mesmas regras de filtro do domínio) |
+| `POST /movies` | 202 Accepted → evento consumido → `GET` 200 |
+| `DELETE /movies/{id}` | 202 Accepted → `GET` 404 |
+| `Scan` direto na tabela do LocalStack | `{"Count": 20}` — os dados estavam de fato no DynamoDB |
+
+Depois da validação, o serviço `movies` voltou para `DB_DRIVER=mongo` como banco titular, por dois motivos:
+
+- o LocalStack Community é um **emulador com dados voláteis** (perde tudo em restart) — adequado para demonstração e desenvolvimento, não para servir a URL pública de forma durável;
+- o endpoint TCP público usado na demonstração foi **removido** em seguida: um emulador sem autenticação não deve ficar exposto à internet.
+
+O serviço `localstack` permanece no projeto (em sleep mode); repetir a demonstração é re-executar os passos 2 e 3.
