@@ -183,6 +183,20 @@ Por isso o gateway decide em tempo de execução:
 
 Isso não é "segurança por obscuridade" como única defesa — a API continua com validação de entrada, rate limiting, timeouts e erros genéricos em 5xx. É **redução de superfície de ataque**: não oferecer informação de reconhecimento gratuita. A justificativa completa está em [docs/security.md](docs/security.md).
 
+Prova prática — o mesmo binário, comportamentos diferentes por ambiente:
+
+```bash
+# Local (APP_ENV=development): documentação disponível para o time
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/swagger/index.html
+# 200
+
+# Produção (APP_ENV=production): a rota nem existe
+curl -s -o /dev/null -w "%{http_code}\n" https://gateway-production-7813.up.railway.app/swagger/index.html
+# 404
+```
+
+A especificação continua versionada no repositório (`api/openapi/`) para quem desenvolve — o que não existe é o endpoint público servindo o mapa da API para qualquer um na internet.
+
 ## Testes
 
 O projeto cumpre os dois requisitos de teste do desafio:
