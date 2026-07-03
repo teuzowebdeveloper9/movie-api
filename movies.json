@@ -1,0 +1,222 @@
+[
+  {
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "cast": ["Tim Robbins", "Morgan Freeman", "Bob Gunton"],
+    "genres": ["Drama"],
+    "href": "The_Shawshank_Redemption",
+    "extract": "The Shawshank Redemption is a 1994 American prison drama film written and directed by Frank Darabont, based on the 1982 Stephen King novella Rita Hayworth and Shawshank Redemption.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "The Godfather",
+    "year": 1972,
+    "cast": ["Marlon Brando", "Al Pacino", "James Caan"],
+    "genres": ["Crime", "Drama"],
+    "href": "The_Godfather",
+    "extract": "The Godfather is a 1972 American crime film directed by Francis Ford Coppola, based on Mario Puzo's best-selling 1969 novel of the same name.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/1/1c/Godfather_ver1.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 331
+  },
+  {
+    "title": "The Dark Knight",
+    "year": 2008,
+    "cast": ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
+    "genres": ["Action", "Crime", "Drama"],
+    "href": "The_Dark_Knight",
+    "extract": "The Dark Knight is a 2008 superhero film directed by Christopher Nolan, the second installment of The Dark Knight Trilogy.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/1/1c/The_Dark_Knight_%282008_film%29.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "Pulp Fiction",
+    "year": 1994,
+    "cast": ["John Travolta", "Samuel L. Jackson", "Uma Thurman"],
+    "genres": ["Crime", "Drama"],
+    "href": "Pulp_Fiction",
+    "extract": "Pulp Fiction is a 1994 American crime film written and directed by Quentin Tarantino, known for its eclectic dialogue and nonlinear storyline.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/3/3b/Pulp_Fiction_%281994%29_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 327
+  },
+  {
+    "title": "Fight Club",
+    "year": 1999,
+    "cast": ["Brad Pitt", "Edward Norton", "Helena Bonham Carter"],
+    "genres": ["Drama"],
+    "href": "Fight_Club",
+    "extract": "Fight Club is a 1999 American film directed by David Fincher, based on the 1996 novel by Chuck Palahniuk.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/f/fc/Fight_Club_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 327
+  },
+  {
+    "title": "Inception",
+    "year": 2010,
+    "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
+    "genres": ["Action", "Science Fiction", "Thriller"],
+    "href": "Inception",
+    "extract": "Inception is a 2010 science fiction action film written and directed by Christopher Nolan, about a thief who steals corporate secrets through dream-sharing technology.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "The Matrix",
+    "year": 1999,
+    "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+    "genres": ["Action", "Science Fiction"],
+    "href": "The_Matrix",
+    "extract": "The Matrix is a 1999 science fiction action film written and directed by the Wachowskis, depicting a dystopian future in which humanity is trapped inside a simulated reality.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 325
+  },
+  {
+    "title": "Goodfellas",
+    "year": 1990,
+    "cast": ["Robert De Niro", "Ray Liotta", "Joe Pesci"],
+    "genres": ["Biography", "Crime", "Drama"],
+    "href": "Goodfellas",
+    "extract": "Goodfellas is a 1990 American biographical crime film directed by Martin Scorsese, an adaptation of the 1985 nonfiction book Wiseguy by Nicholas Pileggi.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/7/7b/Goodfellas.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 346
+  },
+  {
+    "title": "Interstellar",
+    "year": 2014,
+    "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
+    "genres": ["Adventure", "Drama", "Science Fiction"],
+    "href": "Interstellar_(film)",
+    "extract": "Interstellar is a 2014 epic science fiction film directed by Christopher Nolan, following a group of astronauts who travel through a wormhole near Saturn in search of a new home for mankind.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 349
+  },
+  {
+    "title": "Parasite",
+    "year": 2019,
+    "cast": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong"],
+    "genres": ["Comedy", "Drama", "Thriller"],
+    "href": "Parasite_(2019_film)",
+    "extract": "Parasite is a 2019 South Korean black comedy thriller film directed by Bong Joon-ho. It became the first non-English-language film to win the Academy Award for Best Picture.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/5/53/Parasite_%282019_film%29.png",
+    "thumbnail_width": 220,
+    "thumbnail_height": 313
+  },
+  {
+    "title": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "cast": ["Elijah Wood", "Ian McKellen", "Viggo Mortensen"],
+    "genres": ["Adventure", "Fantasy"],
+    "href": "The_Lord_of_the_Rings:_The_Fellowship_of_the_Ring",
+    "extract": "The Fellowship of the Ring is a 2001 epic fantasy adventure film directed by Peter Jackson, based on the first volume of J. R. R. Tolkien's The Lord of the Rings.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/8/8a/The_Lord_of_the_Rings_The_Fellowship_of_the_Ring_%282001%29.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "Forrest Gump",
+    "year": 1994,
+    "cast": ["Tom Hanks", "Robin Wright", "Gary Sinise"],
+    "genres": ["Comedy", "Drama", "Romance"],
+    "href": "Forrest_Gump",
+    "extract": "Forrest Gump is a 1994 American comedy-drama film directed by Robert Zemeckis, based on the 1986 novel by Winston Groom.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/6/67/Forrest_Gump_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 327
+  },
+  {
+    "title": "Spirited Away",
+    "year": 2001,
+    "cast": ["Rumi Hiiragi", "Miyu Irino", "Mari Natsuki"],
+    "genres": ["Animation", "Adventure", "Fantasy"],
+    "href": "Spirited_Away",
+    "extract": "Spirited Away is a 2001 Japanese animated fantasy film written and directed by Hayao Miyazaki and produced by Studio Ghibli.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/d/db/Spirited_Away_Japanese_poster.png",
+    "thumbnail_width": 220,
+    "thumbnail_height": 313
+  },
+  {
+    "title": "Gladiator",
+    "year": 2000,
+    "cast": ["Russell Crowe", "Joaquin Phoenix", "Connie Nielsen"],
+    "genres": ["Action", "Adventure", "Drama"],
+    "href": "Gladiator_(2000_film)",
+    "extract": "Gladiator is a 2000 epic historical drama film directed by Ridley Scott, starring Russell Crowe as a Roman general seeking vengeance.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/f/fb/Gladiator_%282000_film_poster%29.png",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "City of God",
+    "year": 2002,
+    "cast": ["Alexandre Rodrigues", "Leandro Firmino", "Phellipe Haagensen"],
+    "genres": ["Crime", "Drama"],
+    "href": "City_of_God_(2002_film)",
+    "extract": "City of God (Cidade de Deus) is a 2002 Brazilian crime film directed by Fernando Meirelles and Kátia Lund, depicting the growth of organized crime in the Cidade de Deus suburb of Rio de Janeiro.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/1/10/CidadedeDeus.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 315
+  },
+  {
+    "title": "Central Station",
+    "year": 1998,
+    "cast": ["Fernanda Montenegro", "Vinícius de Oliveira", "Marília Pêra"],
+    "genres": ["Drama"],
+    "href": "Central_Station_(film)",
+    "extract": "Central Station (Central do Brasil) is a 1998 Brazilian drama film directed by Walter Salles, following a former schoolteacher who helps a boy search for his father.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/9/9d/Central_do_Brasil.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 316
+  },
+  {
+    "title": "Whiplash",
+    "year": 2014,
+    "cast": ["Miles Teller", "J. K. Simmons", "Paul Reiser"],
+    "genres": ["Drama", "Music"],
+    "href": "Whiplash_(2014_film)",
+    "extract": "Whiplash is a 2014 American psychological drama film written and directed by Damien Chazelle, about an ambitious jazz drummer and his abusive instructor.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/0/01/Whiplash_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  },
+  {
+    "title": "The Silence of the Lambs",
+    "year": 1991,
+    "cast": ["Jodie Foster", "Anthony Hopkins", "Scott Glenn"],
+    "genres": ["Crime", "Drama", "Thriller"],
+    "href": "The_Silence_of_the_Lambs_(film)",
+    "extract": "The Silence of the Lambs is a 1991 American psychological horror film directed by Jonathan Demme, based on Thomas Harris' 1988 novel.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/8/86/The_Silence_of_the_Lambs_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 328
+  },
+  {
+    "title": "Se7en",
+    "year": 1995,
+    "cast": ["Brad Pitt", "Morgan Freeman", "Gwyneth Paltrow"],
+    "genres": ["Crime", "Drama", "Mystery"],
+    "href": "Seven_(1995_film)",
+    "extract": "Se7en is a 1995 American crime thriller film directed by David Fincher, in which two detectives hunt a serial killer who uses the seven deadly sins as a motif.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/6/68/Seven_%28movie%29_poster.jpg",
+    "thumbnail_width": 220,
+    "thumbnail_height": 330
+  },
+  {
+    "title": "Spider-Man: Into the Spider-Verse",
+    "year": 2018,
+    "cast": ["Shameik Moore", "Jake Johnson", "Hailee Steinfeld"],
+    "genres": ["Animation", "Action", "Adventure"],
+    "href": "Spider-Man:_Into_the_Spider-Verse",
+    "extract": "Spider-Man: Into the Spider-Verse is a 2018 American animated superhero film featuring Miles Morales, produced by Sony Pictures Animation.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/b/b4/Spider-Man_Into_the_Spider-Verse_poster.png",
+    "thumbnail_width": 220,
+    "thumbnail_height": 326
+  }
+]
