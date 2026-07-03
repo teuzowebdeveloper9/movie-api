@@ -1,0 +1,25 @@
+services:
+  localstack:
+    image: localstack/localstack:3
+    restart: unless-stopped
+    environment:
+      SERVICES: dynamodb
+      EAGER_SERVICE_LOADING: "1"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - backend
+
+  movies:
+    environment:
+      DB_DRIVER: dynamodb
+      DYNAMODB_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      DYNAMODB_TABLE: movies
+    depends_on:
+      localstack:
+        condition: service_healthy
