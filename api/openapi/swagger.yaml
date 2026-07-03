@@ -1,0 +1,300 @@
+basePath: /
+definitions:
+  handler.AcceptedResponse:
+    properties:
+      id:
+        example: 9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c
+        type: string
+      message:
+        example: request accepted for asynchronous processing
+        type: string
+      status:
+        example: accepted
+        type: string
+    type: object
+  handler.CreateMovieRequest:
+    properties:
+      cast:
+        example:
+        - Keanu Reeves
+        - Carrie-Anne Moss
+        items:
+          type: string
+        type: array
+      extract:
+        example: The Matrix is a 1999 science fiction action film.
+        type: string
+      genres:
+        example:
+        - Action
+        - Science Fiction
+        items:
+          type: string
+        type: array
+      href:
+        example: The_Matrix
+        type: string
+      thumbnail:
+        example: https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg
+        type: string
+      thumbnail_height:
+        example: 325
+        type: integer
+      thumbnail_width:
+        example: 220
+        type: integer
+      title:
+        example: The Matrix
+        type: string
+      year:
+        example: 1999
+        type: integer
+    type: object
+  handler.ErrorDetail:
+    properties:
+      code:
+        example: not_found
+        type: string
+      message:
+        example: movie not found
+        type: string
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handler.ErrorDetail'
+    type: object
+  handler.MovieListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handler.MovieResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/handler.PageMeta'
+    type: object
+  handler.MovieResponse:
+    properties:
+      cast:
+        example:
+        - Keanu Reeves
+        - Carrie-Anne Moss
+        items:
+          type: string
+        type: array
+      created_at:
+        example: "2026-01-15T10:30:00Z"
+        type: string
+      extract:
+        example: The Matrix is a 1999 science fiction action film.
+        type: string
+      genres:
+        example:
+        - Action
+        - Science Fiction
+        items:
+          type: string
+        type: array
+      href:
+        example: The_Matrix
+        type: string
+      id:
+        example: 9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c
+        type: string
+      thumbnail:
+        example: https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg
+        type: string
+      thumbnail_height:
+        example: 325
+        type: integer
+      thumbnail_width:
+        example: 220
+        type: integer
+      title:
+        example: The Matrix
+        type: string
+      updated_at:
+        example: "2026-01-15T10:30:00Z"
+        type: string
+      year:
+        example: 1999
+        type: integer
+    type: object
+  handler.PageMeta:
+    properties:
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 20
+        type: integer
+      total:
+        example: 20
+        type: integer
+      total_pages:
+        example: 1
+        type: integer
+    type: object
+info:
+  contact:
+    name: teuzowebdeveloper9
+    url: https://github.com/teuzowebdeveloper9/movie-api
+  description: REST API for managing movies. The gateway translates REST calls into
+    gRPC requests handled by the Movies microservice (hexagonal architecture, MongoDB/DynamoDB
+    storage, optional event-driven writes through RabbitMQ).
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Movie API
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      description: Returns a paginated list of movies. Supports case-insensitive title
+        search plus genre and year filters.
+      parameters:
+      - default: 1
+        description: 1-based page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: page size (max 100)
+        in: query
+        name: page_size
+        type: integer
+      - description: case-insensitive title search
+        example: matrix
+        in: query
+        name: title
+        type: string
+      - description: exact genre filter
+        example: Drama
+        in: query
+        name: genre
+        type: string
+      - description: release year filter
+        example: 1999
+        in: query
+        name: year
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MovieListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List movies
+      tags:
+      - movies
+    post:
+      consumes:
+      - application/json
+      description: Registers a new movie. In event-driven mode the write is queued
+        and the endpoint answers 202 Accepted; otherwise it answers 201 Created.
+      parameters:
+      - description: movie to create
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: created synchronously
+          headers:
+            Location:
+              description: URL of the (future) resource
+              type: string
+          schema:
+            $ref: '#/definitions/handler.MovieResponse'
+        "202":
+          description: accepted for asynchronous processing
+          headers:
+            Location:
+              description: URL of the (future) resource
+              type: string
+          schema:
+            $ref: '#/definitions/handler.AcceptedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a movie
+      tags:
+      - movies
+  /movies/{id}:
+    delete:
+      description: Removes a movie by ID. In event-driven mode the delete is queued
+        and the endpoint answers 202 Accepted; otherwise it answers 204 No Content.
+      parameters:
+      - description: movie ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: accepted for asynchronous processing
+          schema:
+            $ref: '#/definitions/handler.AcceptedResponse'
+        "204":
+          description: deleted synchronously
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete a movie
+      tags:
+      - movies
+    get:
+      description: Returns a single movie.
+      parameters:
+      - description: movie ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MovieResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get a movie by ID
+      tags:
+      - movies
+swagger: "2.0"
+tags:
+- description: Movie management endpoints
+  name: movies

@@ -1,0 +1,432 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST API for managing movies. The gateway translates REST calls into gRPC requests handled by the Movies microservice (hexagonal architecture, MongoDB/DynamoDB storage, optional event-driven writes through RabbitMQ).",
+        "title": "Movie API",
+        "contact": {
+            "name": "teuzowebdeveloper9",
+            "url": "https://github.com/teuzowebdeveloper9/movie-api"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/movies": {
+            "get": {
+                "description": "Returns a paginated list of movies. Supports case-insensitive title search plus genre and year filters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "List movies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "1-based page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "page size (max 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "matrix",
+                        "description": "case-insensitive title search",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Drama",
+                        "description": "exact genre filter",
+                        "name": "genre",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 1999,
+                        "description": "release year filter",
+                        "name": "year",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.MovieListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Registers a new movie. In event-driven mode the write is queued and the endpoint answers 202 Accepted; otherwise it answers 201 Created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Create a movie",
+                "parameters": [
+                    {
+                        "description": "movie to create",
+                        "name": "movie",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateMovieRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "created synchronously",
+                        "schema": {
+                            "$ref": "#/definitions/handler.MovieResponse"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the (future) resource"
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "accepted for asynchronous processing",
+                        "schema": {
+                            "$ref": "#/definitions/handler.AcceptedResponse"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the (future) resource"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{id}": {
+            "get": {
+                "description": "Returns a single movie.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get a movie by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "movie ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.MovieResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Removes a movie by ID. In event-driven mode the delete is queued and the endpoint answers 202 Accepted; otherwise it answers 204 No Content.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Delete a movie",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "movie ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "accepted for asynchronous processing",
+                        "schema": {
+                            "$ref": "#/definitions/handler.AcceptedResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "deleted synchronously"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.AcceptedResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "request accepted for asynchronous processing"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "accepted"
+                }
+            }
+        },
+        "handler.CreateMovieRequest": {
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Keanu Reeves",
+                        "Carrie-Anne Moss"
+                    ]
+                },
+                "extract": {
+                    "type": "string",
+                    "example": "The Matrix is a 1999 science fiction action film."
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Action",
+                        "Science Fiction"
+                    ]
+                },
+                "href": {
+                    "type": "string",
+                    "example": "The_Matrix"
+                },
+                "thumbnail": {
+                    "type": "string",
+                    "example": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg"
+                },
+                "thumbnail_height": {
+                    "type": "integer",
+                    "example": 325
+                },
+                "thumbnail_width": {
+                    "type": "integer",
+                    "example": 220
+                },
+                "title": {
+                    "type": "string",
+                    "example": "The Matrix"
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 1999
+                }
+            }
+        },
+        "handler.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "not_found"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "movie not found"
+                }
+            }
+        },
+        "handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/handler.ErrorDetail"
+                }
+            }
+        },
+        "handler.MovieListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.MovieResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/handler.PageMeta"
+                }
+            }
+        },
+        "handler.MovieResponse": {
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Keanu Reeves",
+                        "Carrie-Anne Moss"
+                    ]
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-01-15T10:30:00Z"
+                },
+                "extract": {
+                    "type": "string",
+                    "example": "The Matrix is a 1999 science fiction action film."
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Action",
+                        "Science Fiction"
+                    ]
+                },
+                "href": {
+                    "type": "string",
+                    "example": "The_Matrix"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c"
+                },
+                "thumbnail": {
+                    "type": "string",
+                    "example": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg"
+                },
+                "thumbnail_height": {
+                    "type": "integer",
+                    "example": 325
+                },
+                "thumbnail_width": {
+                    "type": "integer",
+                    "example": 220
+                },
+                "title": {
+                    "type": "string",
+                    "example": "The Matrix"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-01-15T10:30:00Z"
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 1999
+                }
+            }
+        },
+        "handler.PageMeta": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "description": "Movie management endpoints",
+            "name": "movies"
+        }
+    ]
+}
