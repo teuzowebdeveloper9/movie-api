@@ -97,6 +97,14 @@ curl http://localhost:8080/movies
 Swagger local: <http://localhost:8080/swagger/index.html>
 RabbitMQ management: <http://localhost:15672> (movies/movies)
 
+### Visualizando os dados (mongo-express)
+
+```bash
+docker compose --profile tools up -d   # ou: make tools
+```
+
+Abre o mongo-express em <http://localhost:8081> (usuário/senha padrão local: `admin`/`admin`, sobrescrevíveis via `MONGO_EXPRESS_USER`/`MONGO_EXPRESS_PASS`). No ambiente do Railway existe um mongo-express equivalente protegido por Basic Auth — a URL e as credenciais ficam nas variables do serviço, fora do repositório.
+
 Para derrubar tudo:
 
 ```bash

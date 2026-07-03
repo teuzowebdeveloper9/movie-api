@@ -111,4 +111,10 @@ Depois da validação, o serviço `movies` voltou para `DB_DRIVER=mongo` como ba
 - o LocalStack Community é um **emulador com dados voláteis** (perde tudo em restart) — adequado para demonstração e desenvolvimento, não para servir a URL pública de forma durável;
 - o endpoint TCP público usado na demonstração foi **removido** em seguida: um emulador sem autenticação não deve ficar exposto à internet.
 
-O serviço `localstack` permanece no projeto (em sleep mode); repetir a demonstração é re-executar os passos 2 e 3.
+Após a validação o serviço `localstack` foi removido do projeto (limite de recursos do plano free do Railway); repetir a demonstração é re-executar os passos 1 a 3.
+
+## Visualizador de dados (mongo-express)
+
+O projeto no Railway inclui um serviço **mongo-express** conectado ao MongoDB pela rede privada (referência `${{MongoDB.MONGO_URL}}`), com domínio público protegido por **Basic Auth** (credenciais nas variables do serviço, nunca no repositório). Alternativa sem UI: conectar o MongoDB Compass na `MONGO_PUBLIC_URL` exposta pelo template do MongoDB.
+
+Em um produto real, um painel administrativo de banco não ficaria exposto na internet nem com Basic Auth — ficaria atrás de VPN/SSO ou acessível apenas por rede privada. Aqui ele existe como ferramenta de inspeção do desafio, com autenticação obrigatória e sessão assinada.

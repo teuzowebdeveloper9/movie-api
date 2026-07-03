@@ -48,9 +48,13 @@ up: ## Start the whole stack (gateway + movies + mongodb + rabbitmq)
 up-dynamodb: ## Start the stack using LocalStack DynamoDB instead of MongoDB
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.localstack.yml up -d --build
 
+.PHONY: tools
+tools: ## Start the stack plus mongo-express (DB viewer at :8081)
+	$(COMPOSE) --profile tools up -d --build
+
 .PHONY: down
 down: ## Stop the stack and remove volumes
-	$(COMPOSE) down -v --remove-orphans
+	$(COMPOSE) --profile tools down -v --remove-orphans
 
 .PHONY: logs
 logs: ## Tail logs from all containers
