@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package movies.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/teuzowebdeveloper9/movie-api/gen/movies/v1;moviesv1";
+
+// MoviesService is the gRPC contract between the API Gateway and the
+// Movies microservice. The gateway translates REST calls into these RPCs.
+service MoviesService {
+  // ListMovies returns a paginated, optionally filtered list of movies.
+  rpc ListMovies(ListMoviesRequest) returns (ListMoviesResponse);
+
+  // GetMovie returns a single movie by its ID.
+  rpc GetMovie(GetMovieRequest) returns (GetMovieResponse);
+
+  // CreateMovie registers a new movie. Depending on the service
+  // configuration the write is applied synchronously or queued for
+  // asynchronous processing (event-driven mode).
+  rpc CreateMovie(CreateMovieRequest) returns (CreateMovieResponse);
+
+  // DeleteMovie removes a movie by its ID. Depending on the service
+  // configuration the write is applied synchronously or queued for
+  // asynchronous processing (event-driven mode).
+  rpc DeleteMovie(DeleteMovieRequest) returns (DeleteMovieResponse);
+}
+
+// Movie mirrors the structure of the movies.json dataset.
+message Movie {
+  string id = 1;
+  string title = 2;
+  int32 year = 3;
+  repeated string cast = 4;
+  repeated string genres = 5;
+  string href = 6;
+  string extract = 7;
+  string thumbnail = 8;
+  int32 thumbnail_width = 9;
+  int32 thumbnail_height = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message ListMoviesRequest {
+  // 1-based page number. Defaults to 1 when unset.
+  int32 page = 1;
+  // Page size. Defaults to 20, capped at 100.
+  int32 page_size = 2;
+  // Optional case-insensitive title search.
+  string title = 3;
+  // Optional exact genre filter (e.g. "Drama").
+  string genre = 4;
+  // Optional release year filter.
+  int32 year = 5;
+}
+
+message ListMoviesResponse {
+  repeated Movie movies = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message GetMovieRequest {
+  string id = 1;
+}
+
+message GetMovieResponse {
+  Movie movie = 1;
+}
+
+message CreateMovieRequest {
+  string title = 1;
+  int32 year = 2;
+  repeated string cast = 3;
+  repeated string genres = 4;
+  string href = 5;
+  string extract = 6;
+  string thumbnail = 7;
+  int32 thumbnail_width = 8;
+  int32 thumbnail_height = 9;
+}
+
+// OperationStatus tells the caller whether a write was applied
+// immediately (COMPLETED) or accepted for asynchronous processing
+// (ACCEPTED). The gateway maps ACCEPTED to HTTP 202.
+enum OperationStatus {
+  OPERATION_STATUS_UNSPECIFIED = 0;
+  OPERATION_STATUS_COMPLETED = 1;
+  OPERATION_STATUS_ACCEPTED = 2;
+}
+
+message CreateMovieResponse {
+  Movie movie = 1;
+  OperationStatus status = 2;
+}
+
+message DeleteMovieRequest {
+  string id = 1;
+}
+
+message DeleteMovieResponse {
+  OperationStatus status = 1;
+}
