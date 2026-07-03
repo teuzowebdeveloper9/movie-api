@@ -1,0 +1,95 @@
+name: movie-api
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-movies}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-movies}
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - backend
+
+  movies:
+    build:
+      context: .
+      dockerfile: docker/movies.Dockerfile
+    image: movie-api/movies:local
+    restart: unless-stopped
+    environment:
+      GRPC_PORT: "50051"
+      DB_DRIVER: mongo
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DATABASE: movies
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-movies}:${RABBITMQ_PASS:-movies}@rabbitmq:5672/
+      ASYNC_WRITES: "true"
+      SEED_ENABLED: "true"
+      LOG_LEVEL: info
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/movies", "healthcheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/gateway.Dockerfile
+    image: movie-api/gateway:local
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      HTTP_PORT: "8080"
+      MOVIES_GRPC_ADDR: movies:50051
+      APP_ENV: ${APP_ENV:-development}
+      RATE_LIMIT_RPM: "300"
+      REQUEST_TIMEOUT: 15s
+      LOG_LEVEL: info
+    depends_on:
+      movies:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/gateway", "healthcheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - backend
+
+volumes:
+  mongo-data:
+
+networks:
+  backend:
