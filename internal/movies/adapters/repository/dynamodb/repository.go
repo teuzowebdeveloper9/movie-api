@@ -88,10 +88,31 @@ func (r *Repository) EnsureTable(ctx context.Context) error {
 	return nil
 }
 
+// byTitle orders movies the same way the MongoDB adapter does (title, then id),
+// keeping list ordering consistent across drivers.
+func byTitle(a, b domain.Movie) int {
+	if c := strings.Compare(strings.ToLower(a.Title), strings.ToLower(b.Title)); c != 0 {
+		return c
+	}
+	return strings.Compare(a.ID, b.ID)
+}
+
+// List scans the table (DynamoDB has no server-side sort and case-insensitive
+// filtering must match the Mongo adapter, so matching is done in-process). To
+// avoid materializing the whole table on every request — an unauthenticated
+// memory/OOM vector — it keeps only the smallest `window` items by sort order
+// while counting the exact total in a single streaming pass. Peak memory is
+// therefore O(offset + pageSize), not O(table), for the common shallow-page
+// case. RCU cost of the scan is inherent to a page+total API without a GSI;
+// see docs — the DynamoDB driver is the demonstrative Cloud differential.
 func (r *Repository) List(ctx context.Context, filter domain.ListFilter) (domain.MoviePage, error) {
 	filter = filter.Normalized()
 
-	var matched []domain.Movie
+	window := filter.Offset() + filter.PageSize
+	var (
+		matched []domain.Movie
+		total   int64
+	)
 	paginator := awsdynamodb.NewScanPaginator(r.client, &awsdynamodb.ScanInput{TableName: aws.String(r.table)})
 	for paginator.HasMorePages() {
 		out, err := paginator.NextPage(ctx)
@@ -107,24 +128,29 @@ func (r *Repository) List(ctx context.Context, filter domain.ListFilter) (domain
 			if err != nil {
 				return domain.MoviePage{}, err
 			}
-			if filter.Matches(movie) {
-				matched = append(matched, movie)
+			if !filter.Matches(movie) {
+				continue
 			}
+			total++
+			matched = append(matched, movie)
+		}
+		// Trim to the window once it grows past twice its size, amortizing the
+		// sort cost while never dropping an item that could reach the page.
+		if len(matched) > 2*window {
+			slices.SortFunc(matched, byTitle)
+			matched = matched[:window]
 		}
 	}
 
-	slices.SortFunc(matched, func(a, b domain.Movie) int {
-		if c := strings.Compare(strings.ToLower(a.Title), strings.ToLower(b.Title)); c != 0 {
-			return c
-		}
-		return strings.Compare(a.ID, b.ID)
-	})
+	slices.SortFunc(matched, byTitle)
+	if len(matched) > window {
+		matched = matched[:window]
+	}
 
 	start := min(filter.Offset(), len(matched))
-	end := min(start+filter.PageSize, len(matched))
 	return domain.MoviePage{
-		Movies:   matched[start:end],
-		Total:    int64(len(matched)),
+		Movies:   matched[start:],
+		Total:    total,
 		Page:     filter.Page,
 		PageSize: filter.PageSize,
 	}, nil
