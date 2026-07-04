@@ -313,6 +313,19 @@ Pipeline em GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)
 
 Pull requests executam lint + testes + build; push na `main` adiciona a publicação das imagens e o deploy.
 
+### Performance de build
+
+Os Dockerfiles usam **BuildKit cache mounts** (cache de módulos e cache de build do Go). Uma mudança de código recompila apenas os pacotes afetados, e o cache de build é compartilhado entre as duas imagens (os pacotes `internal/*` comuns compilam uma única vez). O mesmo cache é reaproveitado no CI via backend `gha`.
+
+Tempo de rebuild após editar código (iteração de dev e CI incremental):
+
+| Imagem | Antes | Depois | Ganho |
+|---|---|---|---|
+| gateway | 16.5s | 6.9s | 2.4× |
+| movies | 18.3s | 3.0s | 6× |
+
+Tamanho final das imagens inalterado (gateway 25.8 MB, movies 28.2 MB — distroless static non-root).
+
 ## Deploy (Railway)
 
 **API em produção:** <https://gateway-production-7813.up.railway.app/movies>
