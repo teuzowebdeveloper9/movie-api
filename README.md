@@ -330,6 +330,10 @@ Tamanho final das imagens inalterado (gateway 25.8 MB, movies 28.2 MB — distro
 
 **API em produção:** <https://gateway-production-7813.up.railway.app/movies>
 
+![Serviços do projeto em execução no Railway: movies, gateway, rabbitmq, mongo-express e MongoDB, todos online](docs/assets/railway-deploy.png)
+
+Os cinco serviços rodando no Railway: **gateway** (único com domínio público), **movies**, **MongoDB** (com volume persistente), **RabbitMQ** (event-driven) e o **mongo-express** (visualizador de dados). Todos comunicando-se pela rede privada do projeto.
+
 O deploy usa as **imagens Docker geradas pelo CI** (GHCR), publicadas no [Railway](https://railway.app). A escolha do Railway é justificada em [docs/trade-offs.md](docs/trade-offs.md): deploy simples, suporte nativo a imagens Docker de registries públicos, rede privada entre serviços e provisionamento de MongoDB/RabbitMQ na mesma plataforma — sem necessidade de gerenciar infraestrutura.
 
 Em produção o gateway roda com `APP_ENV=production`, portanto **sem Swagger publicado** (ver [Swagger](#swagger)). O passo a passo completo do deploy está em [docs/deploy-railway.md](docs/deploy-railway.md).
