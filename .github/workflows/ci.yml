@@ -25,6 +25,25 @@ jobs:
         with:
           version: latest
 
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # histórico completo: vazamento em commit antigo também conta
+      - name: Block tracked .env files
+        run: |
+          if git ls-files | grep -iE '(^|/)\.env(\.[^/]+)?$'; then
+            echo "::error::arquivo .env versionado no repositório — remova e rotacione os segredos"
+            exit 1
+          fi
+          echo "Nenhum .env versionado."
+      - name: Gitleaks (full history)
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            detect --source /repo --redact -v
+
   test:
     name: Unit tests
     runs-on: ubuntu-latest
@@ -57,7 +76,7 @@ jobs:
 
   docker:
     name: Docker image (${{ matrix.service }})
-    needs: [lint, test, build]
+    needs: [lint, secrets, test, build]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:

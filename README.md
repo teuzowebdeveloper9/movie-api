@@ -303,10 +303,11 @@ make cover            # relatório de cobertura em HTML
 Pipeline em GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)):
 
 1. **Lint** — `golangci-lint` (staticcheck, errcheck, gocritic, misspell, gofmt, goimports);
-2. **Testes** — `go test -race` com relatório de cobertura no summary do job;
-3. **Build** — compilação de todos os binários;
-4. **Docker** — build e push das imagens `gateway` e `movies` para o **GitHub Container Registry** (tags `latest`, `sha-*` e semver em releases), com cache de camadas;
-5. **Deploy** — redeploy automático dos serviços no Railway via API GraphQL (quando `RAILWAY_TOKEN` está configurado nos secrets).
+2. **Secret scan** — [gitleaks](https://github.com/gitleaks/gitleaks) no histórico completo + bloqueio de arquivos `.env` versionados; um vazamento reprova o pipeline e impede o build/deploy das imagens;
+3. **Testes** — `go test -race` com relatório de cobertura no summary do job;
+4. **Build** — compilação de todos os binários;
+5. **Docker** — build e push das imagens `gateway` e `movies` para o **GitHub Container Registry** (tags `latest`, `sha-*` e semver em releases), com cache de camadas;
+6. **Deploy** — redeploy automático dos serviços no Railway via API GraphQL (quando `RAILWAY_TOKEN` está configurado nos secrets).
 
 Pull requests executam lint + testes + build; push na `main` adiciona a publicação das imagens e o deploy.
 
