@@ -60,13 +60,22 @@ type ErrorResponse struct {
 	Error ErrorDetail `json:"error"`
 }
 
+// orEmpty keeps list fields as [] in JSON responses: empty repeated fields
+// arrive as nil from protobuf and would otherwise be rendered as null.
+func orEmpty(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
+}
+
 func movieFromProto(m *moviesv1.Movie) MovieResponse {
 	return MovieResponse{
 		ID:              m.GetId(),
 		Title:           m.GetTitle(),
 		Year:            int(m.GetYear()),
-		Cast:            m.GetCast(),
-		Genres:          m.GetGenres(),
+		Cast:            orEmpty(m.GetCast()),
+		Genres:          orEmpty(m.GetGenres()),
 		Href:            m.GetHref(),
 		Extract:         m.GetExtract(),
 		Thumbnail:       m.GetThumbnail(),
