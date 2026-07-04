@@ -105,6 +105,24 @@ func (r *Repository) Create(ctx context.Context, movie domain.Movie) error {
 	return nil
 }
 
+func (r *Repository) CreateMany(ctx context.Context, movies []domain.Movie) error {
+	if len(movies) == 0 {
+		return nil
+	}
+	docs := make([]any, 0, len(movies))
+	for _, m := range movies {
+		docs = append(docs, fromDomain(m))
+	}
+	_, err := r.coll.InsertMany(ctx, docs, options.InsertMany().SetOrdered(false))
+	if mongo.IsDuplicateKeyError(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("inserting movies: %w", err)
+	}
+	return nil
+}
+
 func (r *Repository) Delete(ctx context.Context, id string) error {
 	res, err := r.coll.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
 	if err != nil {

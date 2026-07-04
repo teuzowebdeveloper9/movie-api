@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -163,6 +165,55 @@ func (r *Repository) Create(ctx context.Context, movie domain.Movie) error {
 	}
 	if err != nil {
 		return fmt.Errorf("putting movie: %w", err)
+	}
+	return nil
+}
+
+// batchWriteSize is the DynamoDB BatchWriteItem hard limit per request.
+const batchWriteSize = 25
+
+// batchWriteConcurrency bounds parallel BatchWriteItem calls during bulk
+// loads; sequential writes make seeding ~28k movies take several minutes.
+const batchWriteConcurrency = 8
+
+const maxBatchRetries = 8
+
+func (r *Repository) CreateMany(ctx context.Context, movies []domain.Movie) error {
+	group, ctx := errgroup.WithContext(ctx)
+	group.SetLimit(batchWriteConcurrency)
+	for start := 0; start < len(movies); start += batchWriteSize {
+		batch := movies[start:min(start+batchWriteSize, len(movies))]
+		group.Go(func() error { return r.writeBatch(ctx, batch) })
+	}
+	return group.Wait()
+}
+
+func (r *Repository) writeBatch(ctx context.Context, movies []domain.Movie) error {
+	requests := make([]types.WriteRequest, 0, len(movies))
+	for _, m := range movies {
+		item, err := attributevalue.MarshalMap(fromDomain(m))
+		if err != nil {
+			return fmt.Errorf("encoding movie: %w", err)
+		}
+		requests = append(requests, types.WriteRequest{PutRequest: &types.PutRequest{Item: item}})
+	}
+	pending := map[string][]types.WriteRequest{r.table: requests}
+	for attempt := 0; len(pending[r.table]) > 0; attempt++ {
+		if attempt > maxBatchRetries {
+			return fmt.Errorf("batch writing movies: unprocessed items remain after %d retries", maxBatchRetries)
+		}
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(time.Duration(attempt) * 100 * time.Millisecond):
+			}
+		}
+		out, err := r.client.BatchWriteItem(ctx, &awsdynamodb.BatchWriteItemInput{RequestItems: pending})
+		if err != nil {
+			return fmt.Errorf("batch writing movies: %w", err)
+		}
+		pending = out.UnprocessedItems
 	}
 	return nil
 }

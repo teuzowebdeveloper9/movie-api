@@ -70,6 +70,15 @@ func (r *Repository) Create(_ context.Context, movie domain.Movie) error {
 	return nil
 }
 
+func (r *Repository) CreateMany(_ context.Context, movies []domain.Movie) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, m := range movies {
+		r.movies[m.ID] = clone(m)
+	}
+	return nil
+}
+
 func (r *Repository) Delete(_ context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

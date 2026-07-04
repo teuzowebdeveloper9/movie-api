@@ -10,6 +10,10 @@ type MovieRepository interface {
 	List(ctx context.Context, filter domain.ListFilter) (domain.MoviePage, error)
 	GetByID(ctx context.Context, id string) (domain.Movie, error)
 	Create(ctx context.Context, movie domain.Movie) error
+	// CreateMany bulk-inserts movies for data loading (seeding). Unlike Create,
+	// it does not report domain.ErrAlreadyExists: entries whose ID already
+	// exists may be kept or overwritten depending on the adapter.
+	CreateMany(ctx context.Context, movies []domain.Movie) error
 	Delete(ctx context.Context, id string) error
 }
 

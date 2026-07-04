@@ -31,6 +31,10 @@ func (m *repositoryMock) Create(ctx context.Context, movie domain.Movie) error {
 	return m.Called(ctx, movie).Error(0)
 }
 
+func (m *repositoryMock) CreateMany(ctx context.Context, movies []domain.Movie) error {
+	return m.Called(ctx, movies).Error(0)
+}
+
 func (m *repositoryMock) Delete(ctx context.Context, id string) error {
 	return m.Called(ctx, id).Error(0)
 }
