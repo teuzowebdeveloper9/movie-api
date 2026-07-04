@@ -5,6 +5,10 @@ services:
     environment:
       SERVICES: dynamodb
       EAGER_SERVICE_LOADING: "1"
+      # dynamodb-local em modo in-memory: sem o lock de escrita do SQLite em
+      # disco, o seed dos ~28k filmes cai de ~7min para segundos (emulação
+      # local não precisa de persistência)
+      DYNAMODB_IN_MEMORY: "1"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
       interval: 10s
@@ -20,6 +24,10 @@ services:
       DYNAMODB_ENDPOINT: http://localstack:4566
       AWS_REGION: us-east-1
       DYNAMODB_TABLE: movies
+    healthcheck:
+      # o seed em lote dos ~28k filmes no DynamoDB emulado leva mais tempo
+      # que no MongoDB; janela maior para o primeiro boot com tabela vazia
+      start_period: 360s
     depends_on:
       localstack:
         condition: service_healthy
