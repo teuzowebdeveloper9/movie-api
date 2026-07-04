@@ -3,10 +3,11 @@ package seed
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,16 +16,42 @@ import (
 	"github.com/teuzowebdeveloper9/movie-api/internal/movies/core/ports"
 )
 
+// chunkSize bounds how many movies are handed to CreateMany at once so a
+// large seed file doesn't turn into a single oversized bulk write.
+const chunkSize = 1000
+
 type movieJSON struct {
-	Title           string   `json:"title"`
-	Year            int      `json:"year"`
-	Cast            []string `json:"cast"`
-	Genres          []string `json:"genres"`
-	Href            string   `json:"href"`
-	Extract         string   `json:"extract"`
-	Thumbnail       string   `json:"thumbnail"`
-	ThumbnailWidth  int      `json:"thumbnail_width"`
-	ThumbnailHeight int      `json:"thumbnail_height"`
+	ID              json.Number `json:"id"`
+	Title           string      `json:"title"`
+	Year            flexYear    `json:"year"`
+	Cast            []string    `json:"cast"`
+	Genres          []string    `json:"genres"`
+	Href            string      `json:"href"`
+	Extract         string      `json:"extract"`
+	Thumbnail       string      `json:"thumbnail"`
+	ThumbnailWidth  int         `json:"thumbnail_width"`
+	ThumbnailHeight int         `json:"thumbnail_height"`
+}
+
+// flexYear accepts the year both as a JSON number (legacy format) and as a
+// string ("1894", the format of the provided movies.json). Unparseable values
+// decode to zero so the entry is rejected by domain validation instead of
+// aborting the whole seed file.
+type flexYear int
+
+func (y *flexYear) UnmarshalJSON(data []byte) error {
+	s := strings.TrimSpace(strings.Trim(string(data), `"`))
+	if s == "" || s == "null" {
+		*y = 0
+		return nil
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		*y = 0
+		return nil
+	}
+	*y = flexYear(n)
+	return nil
 }
 
 func Run(ctx context.Context, repo ports.MovieRepository, path string, logger *slog.Logger) error {
@@ -47,11 +74,16 @@ func Run(ctx context.Context, repo ports.MovieRepository, path string, logger *s
 	}
 
 	now := time.Now().UTC()
-	seeded := 0
+	movies := make([]domain.Movie, 0, len(entries))
+	skipped := 0
 	for _, e := range entries {
-		movie, err := domain.NewMovie(uuid.NewString(), domain.NewMovieInput{
+		id := e.ID.String()
+		if id == "" {
+			id = uuid.NewString()
+		}
+		movie, err := domain.NewMovie(id, domain.NewMovieInput{
 			Title:           e.Title,
-			Year:            e.Year,
+			Year:            int(e.Year),
 			Cast:            e.Cast,
 			Genres:          e.Genres,
 			Href:            e.Href,
@@ -62,13 +94,19 @@ func Run(ctx context.Context, repo ports.MovieRepository, path string, logger *s
 		}, now)
 		if err != nil {
 			logger.WarnContext(ctx, "skipping invalid seed entry", "title", e.Title, "error", err)
+			skipped++
 			continue
 		}
-		if err := repo.Create(ctx, movie); err != nil && !errors.Is(err, domain.ErrAlreadyExists) {
-			return fmt.Errorf("seeding movie %q: %w", movie.Title, err)
-		}
-		seeded++
+		movies = append(movies, movie)
 	}
-	logger.InfoContext(ctx, "seed finished", "seeded", seeded, "total_entries", len(entries))
+
+	for start := 0; start < len(movies); start += chunkSize {
+		end := min(start+chunkSize, len(movies))
+		if err := repo.CreateMany(ctx, movies[start:end]); err != nil {
+			return fmt.Errorf("seeding movies %d-%d: %w", start+1, end, err)
+		}
+	}
+	logger.InfoContext(ctx, "seed finished",
+		"seeded", len(movies), "skipped", skipped, "total_entries", len(entries))
 	return nil
 }
