@@ -109,12 +109,23 @@ jobs:
             echo "RAILWAY_TOKEN not configured; skipping automatic redeploy."
             exit 0
           fi
+          redeploy() {
+            curl -sf https://backboard.railway.com/graphql/v2 \
+              -H "$1" \
+              -H "Content-Type: application/json" \
+              --data "{\"query\":\"mutation { serviceInstanceRedeploy(environmentId: \\\"$RAILWAY_ENVIRONMENT_ID\\\", serviceId: \\\"$2\\\") }\"}"
+          }
           for service_id in "$RAILWAY_MOVIES_SERVICE_ID" "$RAILWAY_GATEWAY_SERVICE_ID"; do
             [ -z "$service_id" ] && continue
             echo "Redeploying Railway service $service_id"
-            curl -sf https://backboard.railway.com/graphql/v2 \
-              -H "Authorization: Bearer $RAILWAY_TOKEN" \
-              -H "Content-Type: application/json" \
-              --data "{\"query\":\"mutation { serviceInstanceRedeploy(environmentId: \\\"$RAILWAY_ENVIRONMENT_ID\\\", serviceId: \\\"$service_id\\\") }\"}"
-            echo
+            # project token (escopo restrito, recomendado); fallback para account token
+            out=$(redeploy "Project-Access-Token: $RAILWAY_TOKEN" "$service_id")
+            if echo "$out" | grep -q '"errors"'; then
+              out=$(redeploy "Authorization: Bearer $RAILWAY_TOKEN" "$service_id")
+            fi
+            echo "$out"
+            if echo "$out" | grep -q '"errors"'; then
+              echo "Redeploy failed for service $service_id"
+              exit 1
+            fi
           done
