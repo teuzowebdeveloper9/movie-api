@@ -106,6 +106,8 @@ Resultados observados na API pública durante a demonstração:
 | `DELETE /movies/{id}` | 202 Accepted → `GET` 404 |
 | `Scan` direto na tabela do LocalStack | `{"Count": 20}` — os dados estavam de fato no DynamoDB |
 
+> Nota: a demonstração acima foi feita com um dataset provisório de 20 filmes. O dataset oficial do desafio (`movies.json`, 28.451 filmes) o substituiu em seguida — o seed em lote (`BatchWriteItem`) cobre o volume maior sem mudança de fluxo.
+
 Depois da validação, o serviço `movies` voltou para `DB_DRIVER=mongo` como banco titular, por dois motivos:
 
 - o LocalStack Community é um **emulador com dados voláteis** (perde tudo em restart) — adequado para demonstração e desenvolvimento, não para servir a URL pública de forma durável;

@@ -39,24 +39,30 @@ Lista paginada de filmes.
 | `genre` | string | — | Filtro exato de gênero, case-insensitive |
 | `year` | int | — | Filtro por ano de lançamento |
 
+O dataset oficial (`movies.json`, 28.451 filmes) traz `id`, `title` e `year`; os ids originais são preservados no seed. Os demais campos (`cast`, `genres`, `href`, `extract`, `thumbnail`…) são opcionais e aparecem na resposta quando o filme os possui (ex.: criados via `POST`). O filtro `genre` se aplica a esses filmes.
+
 ```bash
-curl "http://localhost:8080/movies?page=1&page_size=2&genre=Crime"
+curl "http://localhost:8080/movies?page=1&page_size=2&title=matrix"
 ```
 
 ```json
 {
   "data": [
     {
-      "id": "9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c",
-      "title": "City of God",
-      "year": 2002,
-      "cast": ["Alexandre Rodrigues", "Leandro Firmino", "Phellipe Haagensen"],
-      "genres": ["Crime", "Drama"],
-      "href": "City_of_God_(2002_film)",
-      "extract": "City of God (Cidade de Deus) is a 2002 Brazilian crime film...",
-      "thumbnail": "https://upload.wikimedia.org/wikipedia/en/1/10/CidadedeDeus.jpg",
-      "thumbnail_width": 220,
-      "thumbnail_height": 315,
+      "id": "3495874",
+      "title": "SoulMatrix (2014)",
+      "year": 2014,
+      "cast": [],
+      "genres": [],
+      "created_at": "2026-07-03T12:00:00Z",
+      "updated_at": "2026-07-03T12:00:00Z"
+    },
+    {
+      "id": "328832",
+      "title": "The Animatrix (2003)",
+      "year": 2003,
+      "cast": [],
+      "genres": [],
       "created_at": "2026-07-03T12:00:00Z",
       "updated_at": "2026-07-03T12:00:00Z"
     }
@@ -75,7 +81,8 @@ curl "http://localhost:8080/movies?page=1&page_size=2&genre=Crime"
 ## GET /movies/{id}
 
 ```bash
-curl http://localhost:8080/movies/9a2cbe19-9c4d-4b41-8d5c-1c2f36bfb70c
+# ids do movies.json são preservados; filmes criados via POST recebem UUID
+curl http://localhost:8080/movies/8
 ```
 
 `200 OK` com o filme, ou `404`:

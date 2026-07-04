@@ -41,6 +41,15 @@ flowchart LR
 | **MongoDB** | Persistência padrão. Trocável por DynamoDB (LocalStack) apenas com variável de ambiente. |
 | **RabbitMQ** | Mensageria para o modo event-driven: POST e DELETE são processados de forma assíncrona. |
 
+### Dataset
+
+Os dados são baseados no `movies.json` fornecido junto com o desafio: **28.451 filmes** com os campos `id`, `title` e `year`. Na carga inicial (seed):
+
+- os `id`s originais do arquivo são preservados (ex.: `GET /movies/8`);
+- `year`, que vem como string no arquivo (`"1894"`), é normalizado para inteiro;
+- a inserção é feita em lote (`CreateMany` na porta do repositório — `InsertMany` no MongoDB, `BatchWriteItem` no DynamoDB), mantendo o boot rápido mesmo com ~28k registros;
+- os demais campos do domínio (`cast`, `genres`, `href`, `extract`, `thumbnail`…) são opcionais e podem ser enviados no `POST /movies`.
+
 ### Arquitetura Hexagonal (Ports & Adapters)
 
 O serviço Movies segue estritamente a regra de dependência: **o núcleo não importa nada das bordas**.
@@ -145,15 +154,18 @@ make swagger       # regenera documentação Swagger
 ### Exemplos com curl
 
 ```bash
-# Listar filmes (paginado)
+# Listar filmes (paginado — o dataset oficial tem 28.451 registros)
 curl "http://localhost:8080/movies?page=1&page_size=5"
 
-# Buscar por título / gênero / ano
+# Buscar por título / ano
 curl "http://localhost:8080/movies?title=matrix"
-curl "http://localhost:8080/movies?genre=Drama&year=1994"
+curl "http://localhost:8080/movies?year=1994"
 
-# Buscar um filme por ID
-curl http://localhost:8080/movies/{id}
+# Filtro por gênero (campo opcional — presente em filmes criados via POST)
+curl "http://localhost:8080/movies?genre=Drama"
+
+# Buscar um filme por ID (os ids originais do movies.json são preservados)
+curl http://localhost:8080/movies/8
 
 # Criar um filme (modo event-driven responde 202 Accepted)
 curl -i -X POST http://localhost:8080/movies \
