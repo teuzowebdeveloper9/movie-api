@@ -7,3 +7,14 @@ resources:
   - rabbitmq.yaml
   - movies.yaml
   - gateway.yaml
+
+# Credenciais ficam fora do git: os arquivos .env abaixo são gerados
+# localmente com `make k8s-secrets` (ver secrets/*.env.example). O sufixo de
+# hash nos nomes dos Secrets força rolling update quando a credencial muda.
+secretGenerator:
+  - name: rabbitmq-credentials
+    envs:
+      - secrets/rabbitmq.env
+  - name: mongodb-credentials
+    envs:
+      - secrets/mongodb.env

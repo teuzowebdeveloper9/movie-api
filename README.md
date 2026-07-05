@@ -303,7 +303,7 @@ make cover              # relatório de cobertura em HTML
 
 | Diferencial | Implementação |
 |---|---|
-| **Kubernetes** | Manifests completos em `deploy/k8s` (Deployments, StatefulSet, Services, Ingress, HPA, probes gRPC/HTTP, securityContext). Guia em [docs/kubernetes.md](docs/kubernetes.md). |
+| **Kubernetes** | Manifests completos em `deploy/k8s` (Deployments, StatefulSet, Services, Ingress, HPA, probes gRPC/HTTP, securityContext). MongoDB com autenticação e credenciais geradas fora do git via `secretGenerator` (`make k8s-secrets`) — nenhuma senha versionada. Guia em [docs/kubernetes.md](docs/kubernetes.md). |
 | **Event-Driven** | POST/DELETE assíncronos via RabbitMQ com publisher confirms, consumer idempotente e Dead Letter Queue. A API responde `202 Accepted` + `Location`. Detalhes em [docs/event-driven.md](docs/event-driven.md). |
 | **Cloud Computing (LocalStack)** | Repositório DynamoDB completo emulado pelo LocalStack, selecionável por `DB_DRIVER=dynamodb` — demonstração prática do valor da arquitetura hexagonal. Validado localmente **e ao vivo no Railway** (relato em [docs/deploy-railway.md](docs/deploy-railway.md)). |
 

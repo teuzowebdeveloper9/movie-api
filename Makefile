@@ -64,8 +64,30 @@ down: ## Stop the stack and remove volumes
 logs: ## Tail logs from all containers
 	$(COMPOSE) logs -f
 
+.PHONY: k8s-secrets
+k8s-secrets: ## Generate deploy/k8s/secrets/*.env with random credentials (kept out of git)
+	@mkdir -p deploy/k8s/secrets
+	@if [ -f deploy/k8s/secrets/rabbitmq.env ]; then \
+		echo "deploy/k8s/secrets/rabbitmq.env já existe — remova-o para regenerar"; \
+	else \
+		pass=$$(openssl rand -hex 16); \
+		printf 'username=movies\npassword=%s\nurl=amqp://movies:%s@rabbitmq:5672/\n' "$$pass" "$$pass" \
+			> deploy/k8s/secrets/rabbitmq.env; \
+		echo "gerado deploy/k8s/secrets/rabbitmq.env"; \
+	fi
+	@if [ -f deploy/k8s/secrets/mongodb.env ]; then \
+		echo "deploy/k8s/secrets/mongodb.env já existe — remova-o para regenerar"; \
+	else \
+		pass=$$(openssl rand -hex 16); \
+		printf 'username=movies\npassword=%s\nuri=mongodb://movies:%s@mongodb:27017/?authSource=admin\n' "$$pass" "$$pass" \
+			> deploy/k8s/secrets/mongodb.env; \
+		echo "gerado deploy/k8s/secrets/mongodb.env"; \
+	fi
+
 .PHONY: k8s-apply
-k8s-apply: ## Apply Kubernetes manifests
+k8s-apply: ## Apply Kubernetes manifests (requires make k8s-secrets first)
+	@test -f deploy/k8s/secrets/rabbitmq.env -a -f deploy/k8s/secrets/mongodb.env || \
+		{ echo "credenciais ausentes: rode 'make k8s-secrets' antes"; exit 1; }
 	kubectl apply -k deploy/k8s
 
 .PHONY: k8s-delete

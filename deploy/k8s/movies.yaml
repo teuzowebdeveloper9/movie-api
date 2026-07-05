@@ -5,7 +5,7 @@ metadata:
 data:
   GRPC_PORT: "50051"
   DB_DRIVER: mongo
-  MONGO_URI: mongodb://mongodb:27017
+  # MONGO_URI carrega credenciais e vem do Secret mongodb-credentials
   MONGO_DATABASE: movies
   ASYNC_WRITES: "true"
   SEED_ENABLED: "true"
@@ -61,6 +61,11 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-credentials
                   key: url
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: uri
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

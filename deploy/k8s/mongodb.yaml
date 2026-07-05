@@ -36,6 +36,21 @@ spec:
           ports:
             - name: mongo
               containerPort: 27017
+          # Com credenciais definidas o mongod sobe com --auth. As variáveis
+          # MONGO_INITDB_* só criam o usuário quando o volume está vazio:
+          # para rotacionar a senha de um volume existente, atualize também o
+          # usuário no próprio MongoDB (db.changeUserPassword).
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-credentials
+                  key: password
           resources:
             requests:
               cpu: 100m
