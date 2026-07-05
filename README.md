@@ -231,11 +231,18 @@ O projeto cumpre os dois requisitos de teste do desafio:
 - `internal/movies/core/domain` — regras de negócio puras (validação, normalização, filtros);
 - `internal/movies/adapters/repository/memory` — repositório real em memória (CRUD, paginação, isolamento de dados);
 - `internal/movies/adapters/grpcserver` — servidor gRPC real via `bufconn`, com serviço e repositório reais (fluxo CRUD completo de ponta a ponta);
-- `internal/movies/adapters/repository/dynamodb` — mapeamento de itens (roundtrip e parsing de timestamps).
+- `internal/movies/adapters/repository/dynamodb` — mapeamento de itens (roundtrip, parsing de timestamps e atributos derivados da GSI).
+
+**Integração** (adapters reais contra backends reais, via [testcontainers](https://testcontainers.com/)):
+- `repository/mongodb` e `repository/dynamodb` — ambos passam pela **mesma suite de conformidade** (`repository/repositorytest`), que trava ordenação, filtros, paginação e semântica de erros idênticos entre drivers; o DynamoDB ainda cobre a migração de tabela legada (criação da GSI + backfill);
+- `messaging/rabbitmq` — publisher e consumer contra um broker real: publish → confirm → consume → apply, e mensagem podre indo para a DLQ sem tocar o applier.
+
+Ficam atrás da build tag `integration` (exigem Docker) e rodam como job próprio no CI.
 
 ```bash
-go test -race ./...   # ou: make test
-make cover            # relatório de cobertura em HTML
+go test -race ./...     # unitários — ou: make test
+make test-integration   # integração via testcontainers (Docker)
+make cover              # relatório de cobertura em HTML
 ```
 
 ## Variáveis de ambiente
@@ -307,11 +314,12 @@ Pipeline em GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)
 1. **Lint** — `golangci-lint` (staticcheck, errcheck, gocritic, misspell, gofmt, goimports);
 2. **Secret scan** — [gitleaks](https://github.com/gitleaks/gitleaks) no histórico completo + bloqueio de arquivos `.env` versionados; um vazamento reprova o pipeline e impede o build/deploy das imagens;
 3. **Testes** — `go test -race` com relatório de cobertura no summary do job;
-4. **Build** — compilação de todos os binários;
-5. **Docker** — build e push das imagens `gateway` e `movies` para o **GitHub Container Registry** (tags `latest`, `sha-*` e semver em releases), com cache de camadas;
-6. **Deploy** — redeploy automático dos serviços no Railway via API GraphQL (quando `RAILWAY_TOKEN` está configurado nos secrets).
+4. **Integração** — `make test-integration`: adapters reais (MongoDB, DynamoDB/LocalStack, RabbitMQ) contra containers de verdade via testcontainers;
+5. **Build** — compilação de todos os binários;
+6. **Docker** — build e push das imagens `gateway` e `movies` para o **GitHub Container Registry** (tags `latest`, `sha-*` e semver em releases), com cache de camadas;
+7. **Deploy** — redeploy automático dos serviços no Railway via API GraphQL (quando `RAILWAY_TOKEN` está configurado nos secrets).
 
-Pull requests executam lint + testes + build; push na `main` adiciona a publicação das imagens e o deploy.
+Pull requests executam lint + testes (unitários e de integração) + build; push na `main` adiciona a publicação das imagens e o deploy.
 
 ### Performance de build
 

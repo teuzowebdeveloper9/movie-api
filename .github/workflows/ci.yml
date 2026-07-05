@@ -64,6 +64,18 @@ jobs:
           name: coverage
           path: coverage.out
 
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      # testcontainers usa o Docker do runner para subir MongoDB, LocalStack
+      # (DynamoDB) e RabbitMQ reais e validar os adapters contra eles
+      - run: make test-integration
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -76,7 +88,7 @@ jobs:
 
   docker:
     name: Docker image (${{ matrix.service }})
-    needs: [lint, secrets, test, build]
+    needs: [lint, secrets, test, integration, build]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
