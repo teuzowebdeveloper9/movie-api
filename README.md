@@ -128,7 +128,7 @@ docker compose -f docker-compose.yml -f docker-compose.localstack.yml up -d --bu
 
 O serviço Movies passa a persistir no DynamoDB emulado pelo LocalStack — mesma API, mesmo seed, zero mudança de código.
 
-> **Modo demonstrativo.** O adapter DynamoDB é o diferencial de *Cloud Computing*; o banco titular é o MongoDB (indexado). Como DynamoDB não tem ordenação nem contagem com filtro no servidor, o `List` faz `Scan` na tabela e ordena/filtra em processo (para manter a busca case-insensitive idêntica à do Mongo). Para não materializar a tabela inteira a cada requisição — um vetor de OOM/custo sem autenticação — o `List` conta o total em streaming e mantém em memória apenas a janela `offset + page_size` (pico de memória O(página), não O(tabela)). Numa carga real, a evolução é uma GSI para os filtros e paginação por cursor (`ExclusiveStartKey`).
+> **Modo demonstrativo.** O adapter DynamoDB é o diferencial de *Cloud Computing*; o banco titular é o MongoDB (indexado). O `List` consulta a GSI `title-sort-index` (chave de ordenação = título minúsculo + id): os itens chegam do servidor já na ordem da listagem, os filtros de título/gênero/ano viram `FilterExpression` e a leitura para assim que a janela `offset + page_size` enche — leitura e memória O(página) no caso comum, não O(tabela). O total exato usa uma Query `Select=COUNT` separada, sem transferir itens. O índice é criado junto com a tabela e, em tabelas antigas, adicionado via `UpdateTable` com backfill automático. Detalhes e limites em [docs/trade-offs.md](docs/trade-offs.md).
 
 ### Com Makefile
 
