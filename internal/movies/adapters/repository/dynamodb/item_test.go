@@ -33,6 +33,28 @@ func TestItemRoundTrip(t *testing.T) {
 	assert.Equal(t, movie, got)
 }
 
+func TestItemDerivedAttributes(t *testing.T) {
+	movie := domain.Movie{
+		ID:     "movie-1",
+		Title:  "The Matrix",
+		Genres: []string{"Action", "action", "Sci-Fi"},
+	}
+
+	item := fromDomain(movie)
+
+	assert.Equal(t, gsiPartitionValue, item.GsiPK)
+	assert.Equal(t, "the matrix"+titleSortSeparator+"movie-1", item.TitleSort)
+	assert.Equal(t, "the matrix", item.TitleLC)
+	// deduplicated after lowercasing: DynamoDB string sets reject duplicates
+	assert.Equal(t, []string{"action", "sci-fi"}, item.GenresLC)
+}
+
+func TestItemDerivedAttributes_NoGenres(t *testing.T) {
+	item := fromDomain(domain.Movie{ID: "movie-1", Title: "Alien"})
+
+	assert.Empty(t, item.GenresLC)
+}
+
 func TestItemToDomain_EmptyTimestamps(t *testing.T) {
 	item := movieItem{ID: "movie-1", Title: "The Matrix", Year: 1999}
 

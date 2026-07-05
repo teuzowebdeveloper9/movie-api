@@ -50,13 +50,13 @@ Registro das principais escolhas, o que foi ganho e o que foi conscientemente sa
 
 **Sacrifício:** sem contador de tentativas persistente, uma falha classificada como transitória que na verdade é permanente pode reciclar por mais tempo que o ideal. Evolução: retry com backoff + limite via header `x-death`.
 
-## Listagem no DynamoDB via Scan
+## Listagem no DynamoDB via Query em GSI ordenada
 
-**Escolha:** `GET /movies` no driver DynamoDB usa Scan + filtro/paginação em memória, reaproveitando o mesmo `ListFilter.Matches` do domínio.
+**Escolha:** `GET /movies` no driver DynamoDB consulta a GSI `title-sort-index` (partition key constante `gsi_pk`, sort key `title_sort` = título minúsculo + id). Os itens já chegam do servidor na ordem da listagem e a leitura para assim que a janela da página (`offset + page_size`) enche; os filtros de título/gênero/ano viram `FilterExpression` server-side com a mesma semântica de `ListFilter.Matches`. `EnsureTable` cria a GSI junto com a tabela e, em tabelas pré-existentes, adiciona o índice via `UpdateTable` e faz backfill dos itens antigos (a GSI é esparsa: itens sem `gsi_pk` ficariam invisíveis nela).
 
-**Ganho:** paridade de comportamento entre os três repositórios com implementação simples e correta para o dataset do desafio (dezenas de registros).
+**Ganho:** sem Scan e sem ordenação em memória — no caso comum (primeiras páginas) a leitura é O(janela) em vez de O(tabela), com memória O(janela).
 
-**Sacrifício:** Scan é O(tabela) e não escala. Em produção, o desenho correto seria GSIs por gênero/ano e paginação por `LastEvaluatedKey` (cursor) em vez de página numérica — mudança confinada ao adapter, sem tocar o núcleo.
+**Sacrifício:** o total exato ainda exige uma segunda Query com `Select=COUNT` percorrendo a partição — inerente ao contrato "página numérica + total", mas sem transferir dados de item. A partition key constante concentra a GSI em uma única partição: suficiente para os 28k registros do desafio; em escala real a chave seria fragmentada (`MOVIE#0..N`) ou a paginação migraria para cursor por `LastEvaluatedKey`. Leituras de GSI são eventualmente consistentes — o que o fluxo de escrita assíncrona já implica.
 
 ## Código gerado versionado no repositório
 
