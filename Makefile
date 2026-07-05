@@ -32,6 +32,10 @@ cover: ## Run tests and open coverage report
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "coverage report: coverage.html"
 
+.PHONY: test-integration
+test-integration: ## Run adapter integration tests via testcontainers (requires Docker)
+	go test -race -tags=integration -run Integration -timeout 20m ./internal/movies/adapters/...
+
 .PHONY: lint
 lint: ## Run golangci-lint
 	golangci-lint run ./...

@@ -1,5 +1,10 @@
 version: "2"
 
+run:
+  # inclui os testes de integração (testcontainers) na análise
+  build-tags:
+    - integration
+
 linters:
   default: standard
   enable:
